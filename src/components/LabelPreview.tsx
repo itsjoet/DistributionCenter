@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, Maximize2, LayoutGrid, Eye, Check } from 'lucide-react';
-import { RenderedLabelItem, LabelMode, SerializedConfig, InfoConfig } from '../types/label';
+import { RenderedLabelItem, LabelMode, SerializedConfig, InfoConfig, PrintOrientation } from '../types/label';
 import { generateBarcodeDataUrl } from '../utils/barcodeHelper';
 
 interface LabelPreviewProps {
@@ -10,6 +10,7 @@ interface LabelPreviewProps {
   onSelectIndex: (index: number) => void;
   serializedConfig: SerializedConfig;
   infoConfig: InfoConfig;
+  printOrientation?: PrintOrientation;
 }
 
 export const LabelPreview: React.FC<LabelPreviewProps> = ({
@@ -19,6 +20,7 @@ export const LabelPreview: React.FC<LabelPreviewProps> = ({
   onSelectIndex,
   serializedConfig,
   infoConfig,
+  printOrientation = 'normal',
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [showRuler, setShowRuler] = useState<boolean>(true);
@@ -66,7 +68,7 @@ export const LabelPreview: React.FC<LabelPreviewProps> = ({
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
       {/* Preview Top Toolbar */}
       <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <Eye className="w-3.5 h-3.5 text-slate-700" />
             <span>Interactive 4" × 2" Label Preview</span>
@@ -75,6 +77,17 @@ export const LabelPreview: React.FC<LabelPreviewProps> = ({
           <span className="text-xs font-mono text-slate-600 bg-slate-200/60 px-2 py-0.5 rounded">
             288pt × 144pt (2:1)
           </span>
+
+          {printOrientation === 'rotate90' && (
+            <span className="text-[10px] font-semibold text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span>PDF Rotated 90° for Roll Feed</span>
+            </span>
+          )}
+          {printOrientation === 'rotate180' && (
+            <span className="text-[10px] font-semibold text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full">
+              Inverted 180°
+            </span>
+          )}
         </div>
 
         {/* Zoom & View Controls */}

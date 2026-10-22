@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Bookmark, BookmarkPlus, Download, Upload, Trash2, Check, ArrowRight, RotateCcw, Clock } from 'lucide-react';
 import { SavedProfile } from '../types/storage';
-import { LabelMode, SerializedConfig, InfoConfig, ExportFormat } from '../types/label';
+import { LabelMode, SerializedConfig, InfoConfig, ExportFormat, PrintOrientation } from '../types/label';
 import { saveProfile, deleteProfile, updateProfile, exportProfilesJson, importProfilesJson } from '../utils/storageHelper';
 
 interface SavedConfigsModalProps {
@@ -12,6 +12,7 @@ interface SavedConfigsModalProps {
   currentInfoConfig: InfoConfig;
   currentCustomSerialList: string;
   currentExportFormat: ExportFormat;
+  currentPrintOrientation?: PrintOrientation;
   onLoadProfile: (profile: SavedProfile) => void;
   savedProfiles: SavedProfile[];
   setSavedProfiles: React.Dispatch<React.SetStateAction<SavedProfile[]>>;
@@ -26,6 +27,7 @@ export const SavedConfigsModal: React.FC<SavedConfigsModalProps> = ({
   currentInfoConfig,
   currentCustomSerialList,
   currentExportFormat,
+  currentPrintOrientation,
   onLoadProfile,
   savedProfiles,
   setSavedProfiles,
@@ -47,6 +49,7 @@ export const SavedConfigsModal: React.FC<SavedConfigsModalProps> = ({
       infoConfig: currentInfoConfig,
       customSerialList: currentCustomSerialList,
       exportFormat: currentExportFormat,
+      printOrientation: currentPrintOrientation,
     });
 
     setSavedProfiles((prev) => [saved, ...prev]);
@@ -63,6 +66,7 @@ export const SavedConfigsModal: React.FC<SavedConfigsModalProps> = ({
         infoConfig: currentInfoConfig,
         customSerialList: currentCustomSerialList,
         exportFormat: currentExportFormat,
+        printOrientation: currentPrintOrientation,
       });
       setSavedProfiles(updated);
       onNotify(`Updated "${profile.name}" with current settings.`);

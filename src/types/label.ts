@@ -8,6 +8,8 @@ export type TextSizePreset = 'compact' | 'balanced' | 'large' | 'xlarge' | 'cust
 
 export type LabelBorderStyle = 'none' | 'subtle_guide' | 'solid_border';
 
+export type PrintOrientation = 'normal' | 'rotate90' | 'rotate180' | 'rotate270';
+
 export interface SerializedConfig {
   companyTitle: string;
   subtitle: string;

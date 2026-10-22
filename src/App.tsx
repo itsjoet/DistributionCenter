@@ -15,6 +15,7 @@ import { SavedConfigsModal } from './components/SavedConfigsModal';
 import {
   LabelMode,
   ExportFormat,
+  PrintOrientation,
   SerializedConfig,
   InfoConfig,
   RenderedLabelItem,
@@ -27,7 +28,8 @@ import {
   saveLastActiveConfig,
   loadLastActiveConfig,
 } from './utils/storageHelper';
-import { Barcode, FileText, CheckCircle2, Info, Bookmark } from 'lucide-react';
+import { PrinterGuideModal } from './components/PrinterGuideModal';
+import { Barcode, FileText, CheckCircle2, Info, Bookmark, HelpCircle } from 'lucide-react';
 
 export default function App() {
   // Try loading last active session from browser storage
@@ -41,13 +43,19 @@ export default function App() {
     lastActive?.exportFormat || 'single_roll'
   );
 
+  // Print orientation: 'normal' (4x2) vs 'rotate90' (2x4 feed) vs 'rotate180'
+  const [printOrientation, setPrintOrientation] = useState<PrintOrientation>(
+    lastActive?.printOrientation || 'normal'
+  );
+
   // Currently viewed label index in preview
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Saved configs modal open state
+  // Modals state
   const [isSavedModalOpen, setIsSavedModalOpen] = useState<boolean>(false);
+  const [isPrinterGuideOpen, setIsPrinterGuideOpen] = useState<boolean>(false);
   const [savedProfiles, setSavedProfiles] = useState<SavedProfile[]>(() => getSavedProfiles());
 
   // Serialized configuration state (Matches the user's uploaded reference image format by default)
@@ -139,10 +147,11 @@ export default function App() {
         infoConfig,
         customSerialList,
         exportFormat,
+        printOrientation,
       });
     }, 600);
     return () => clearTimeout(timer);
-  }, [mode, serializedConfig, infoConfig, customSerialList, exportFormat]);
+  }, [mode, serializedConfig, infoConfig, customSerialList, exportFormat, printOrientation]);
 
   // Handle loading a saved profile
   const handleLoadProfile = (profile: SavedProfile) => {
@@ -154,6 +163,9 @@ export default function App() {
     }
     if (profile.exportFormat) {
       setExportFormat(profile.exportFormat);
+    }
+    if (profile.printOrientation) {
+      setPrintOrientation(profile.printOrientation);
     }
     setCurrentIndex(0);
     setToastMessage(`Loaded configuration: "${profile.name}"`);
@@ -308,6 +320,7 @@ export default function App() {
 
       const options = {
         format: exportFormat,
+        printOrientation,
         borderStyle: mode === 'serialized' ? serializedConfig.borderStyle : infoConfig.borderStyle,
         fontFamily: mode === 'serialized' ? serializedConfig.fontFamily : infoConfig.fontFamily,
         titleSize: mode === 'serialized' ? serializedConfig.titleSize : infoConfig.titleSize,
@@ -433,10 +446,13 @@ export default function App() {
             <ExportToolbar
               exportFormat={exportFormat}
               setExportFormat={setExportFormat}
+              printOrientation={printOrientation}
+              setPrintOrientation={setPrintOrientation}
               totalLabels={renderedItems.length}
               onDownloadPdf={handleDownloadPdf}
               onDirectPrint={handleDirectPrint}
               isGeneratingPdf={isGeneratingPdf}
+              onOpenPrinterGuide={() => setIsPrinterGuideOpen(true)}
             />
           </div>
 
@@ -449,6 +465,7 @@ export default function App() {
               onSelectIndex={setCurrentIndex}
               serializedConfig={serializedConfig}
               infoConfig={infoConfig}
+              printOrientation={printOrientation}
             />
 
             {/* Informational specs box */}
@@ -461,6 +478,17 @@ export default function App() {
                 <li>
                   <strong className="text-slate-800">Direct Thermal Printers:</strong> Select{' '}
                   <em>Direct 4" × 2" Roll</em> for Zebra, Rollo, MUNBYN, and DYMO 4x2 rolls.
+                </li>
+                <li>
+                  <strong className="text-slate-800">Sideways / Cut-off Printing?</strong> If your printer feeds lengthwise, toggle{' '}
+                  <em>Rotated 90°</em> or open the{' '}
+                  <button
+                    type="button"
+                    onClick={() => setIsPrinterGuideOpen(true)}
+                    className="text-amber-700 font-semibold underline hover:text-amber-900 cursor-pointer"
+                  >
+                    Printer Setup Guide
+                  </button>.
                 </li>
                 <li>
                   <strong className="text-slate-800">Laser & Inkjet Printers:</strong> Select{' '}
@@ -484,6 +512,14 @@ export default function App() {
         </div>
       )}
 
+      {/* Printer Setup & Sideways Troubleshooting Modal */}
+      <PrinterGuideModal
+        isOpen={isPrinterGuideOpen}
+        onClose={() => setIsPrinterGuideOpen(false)}
+        printOrientation={printOrientation}
+        setPrintOrientation={setPrintOrientation}
+      />
+
       {/* Saved Configurations Management Modal */}
       <SavedConfigsModal
         isOpen={isSavedModalOpen}
@@ -493,6 +529,7 @@ export default function App() {
         currentInfoConfig={infoConfig}
         currentCustomSerialList={customSerialList}
         currentExportFormat={exportFormat}
+        currentPrintOrientation={printOrientation}
         onLoadProfile={handleLoadProfile}
         savedProfiles={savedProfiles}
         setSavedProfiles={setSavedProfiles}
@@ -506,6 +543,7 @@ export default function App() {
       <PrintContainer
         items={renderedItems}
         format={exportFormat}
+        printOrientation={printOrientation}
         serializedConfig={serializedConfig}
         infoConfig={infoConfig}
       />

@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import JsBarcode from 'jsbarcode';
-import { RenderedLabelItem, SerializedConfig, InfoConfig, ExportFormat, BarcodeFormat } from '../types/label';
+import { RenderedLabelItem, SerializedConfig, InfoConfig, ExportFormat, BarcodeFormat, PrintOrientation } from '../types/label';
 
 interface PrintContainerProps {
   items: RenderedLabelItem[];
   format: ExportFormat;
+  printOrientation?: PrintOrientation;
   serializedConfig: SerializedConfig;
   infoConfig: InfoConfig;
 }
@@ -58,33 +59,76 @@ SvgBarcode.displayName = 'SvgBarcode';
 export const PrintContainer: React.FC<PrintContainerProps> = ({
   items,
   format,
+  printOrientation = 'normal',
   serializedConfig,
   infoConfig,
 }) => {
   if (items.length === 0) return null;
 
+  const isVertical = format === 'single_roll' && (printOrientation === 'rotate90' || printOrientation === 'rotate270');
+
   return (
     <div id="printable-label-area" className="hidden print:block">
+      {/* Dynamic @page size for accurate print dialog dimensions */}
+      <style>{`
+        @media print {
+          @page {
+            size: ${format === 'single_roll' ? (isVertical ? '2in 4in portrait' : '4in 2in landscape') : '8.5in 11in portrait'};
+            margin: 0;
+          }
+        }
+      `}</style>
+
       {format === 'single_roll' ? (
-        // Single roll format: one 4" x 2" label per page
-        items.map((item, idx) => (
-          <div
-            key={item.id || idx}
-            style={{
-              width: '4in',
-              height: '2in',
-              padding: '0.2in',
-              boxSizing: 'border-box',
-              pageBreakAfter: 'always',
-              breakAfter: 'page',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              fontFamily: item.mode === 'serialized' ? serializedConfig.fontFamily : infoConfig.fontFamily,
-              backgroundColor: '#ffffff',
-              border: serializedConfig.borderStyle === 'solid_border' ? '1px solid black' : undefined,
-            }}
-          >
+        // Single roll format: one 4" x 2" label per page (with orientation rotation support)
+        items.map((item, idx) => {
+          let transformStyle: React.CSSProperties = {
+            width: '4in',
+            height: '2in',
+            padding: '0.2in',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            fontFamily: item.mode === 'serialized' ? serializedConfig.fontFamily : infoConfig.fontFamily,
+            backgroundColor: '#ffffff',
+            border: serializedConfig.borderStyle === 'solid_border' ? '1px solid black' : undefined,
+          };
+
+          if (printOrientation === 'rotate90') {
+            transformStyle = {
+              ...transformStyle,
+              transformOrigin: '0 0',
+              transform: 'translate(2in, 0) rotate(90deg)',
+            };
+          } else if (printOrientation === 'rotate270') {
+            transformStyle = {
+              ...transformStyle,
+              transformOrigin: '0 0',
+              transform: 'translate(0, 4in) rotate(270deg)',
+            };
+          } else if (printOrientation === 'rotate180') {
+            transformStyle = {
+              ...transformStyle,
+              transformOrigin: 'center center',
+              transform: 'rotate(180deg)',
+            };
+          }
+
+          return (
+            <div
+              key={item.id || idx}
+              style={{
+                width: isVertical ? '2in' : '4in',
+                height: isVertical ? '4in' : '2in',
+                overflow: 'hidden',
+                pageBreakAfter: 'always',
+                breakAfter: 'page',
+                position: 'relative',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div style={transformStyle}>
             {item.mode === 'serialized' ? (
               // Serialized Layout
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', textAlign: 'center' }}>
@@ -142,8 +186,10 @@ export const PrintContainer: React.FC<PrintContainerProps> = ({
               </div>
             )}
           </div>
-        ))
-      ) : (
+        </div>
+      );
+    })
+  ) : (
         // Avery 5163 10-up letter sheet
         <div style={{ width: '8.5in', padding: '0.5in 0.156in', boxSizing: 'border-box' }}>
           <div

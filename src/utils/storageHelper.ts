@@ -1,5 +1,5 @@
 import { SavedProfile } from '../types/storage';
-import { LabelMode, SerializedConfig, InfoConfig, ExportFormat } from '../types/label';
+import { LabelMode, SerializedConfig, InfoConfig, ExportFormat, PrintOrientation } from '../types/label';
 import { getTodayFormatted } from './dateHelper';
 
 const STORAGE_PROFILES_KEY = 'label_maker_saved_configs_v1';
@@ -136,6 +136,7 @@ export function saveProfile(
     infoConfig: InfoConfig;
     customSerialList?: string;
     exportFormat: ExportFormat;
+    printOrientation?: PrintOrientation;
   }
 ): SavedProfile {
   const profiles = getSavedProfiles();
@@ -226,6 +227,7 @@ export function saveLastActiveConfig(data: {
   infoConfig: InfoConfig;
   customSerialList?: string;
   exportFormat: ExportFormat;
+  printOrientation?: PrintOrientation;
 }): void {
   try {
     localStorage.setItem(STORAGE_LAST_ACTIVE_KEY, JSON.stringify(data));
@@ -243,6 +245,7 @@ export function loadLastActiveConfig(): {
   infoConfig: InfoConfig;
   customSerialList?: string;
   exportFormat: ExportFormat;
+  printOrientation?: PrintOrientation;
 } | null {
   try {
     const raw = localStorage.getItem(STORAGE_LAST_ACTIVE_KEY);

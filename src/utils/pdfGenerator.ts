@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { ExportFormat, LabelBorderStyle, SerializedConfig, InfoConfig } from '../types/label';
+import { ExportFormat, LabelBorderStyle, PrintOrientation } from '../types/label';
 import { generateBarcodeDataUrl } from './barcodeHelper';
 
 export interface LabelDrawData {
@@ -15,8 +15,9 @@ export interface LabelDrawData {
   notes?: string;
 }
 
-interface CommonPdfOptions {
+export interface CommonPdfOptions {
   format: ExportFormat;
+  printOrientation?: PrintOrientation;
   borderStyle: LabelBorderStyle;
   fontFamily: string;
   titleSize: number;
@@ -245,20 +246,63 @@ export async function generateLabelsPdf(
   const labelHeight = 2.0; // 2 inches
 
   let doc: jsPDF;
+  const printOrientation = options.printOrientation || 'normal';
+  const isVerticalFeed = printOrientation === 'rotate90' || printOrientation === 'rotate270';
 
   if (format === 'single_roll') {
-    // Single 4" x 2" page per label (standard for direct thermal roll printers: 4" width x 2" height)
-    doc = new jsPDF({
-      orientation: 'landscape',
-      unit: 'in',
-      format: [4, 2],
-    });
+    // Single page per label
+    // If rotated 90° or 270°, page is portrait 2" width x 4" height
+    // If normal or 180°, page is landscape 4" width x 2" height
+    if (isVerticalFeed) {
+      doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'in',
+        format: [2, 4],
+      });
+    } else {
+      doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'in',
+        format: [4, 2],
+      });
+    }
+
+    const MatrixClass = (doc as any).Matrix;
 
     labels.forEach((label, index) => {
       if (index > 0) {
-        doc.addPage([4, 2], 'landscape');
+        if (isVerticalFeed) {
+          doc.addPage([2, 4], 'portrait');
+        } else {
+          doc.addPage([4, 2], 'landscape');
+        }
       }
-      drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
+
+      if (printOrientation === 'rotate90') {
+        // Rotate 90 degrees clockwise (maps [0, 4] x [0, 2] to [0, 2] x [0, 4])
+        doc.saveGraphicsState();
+        const m = new MatrixClass(0, 1, -1, 0, 2, 0);
+        doc.setCurrentTransformationMatrix(m);
+        drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
+        doc.restoreGraphicsState();
+      } else if (printOrientation === 'rotate180') {
+        // Rotate 180 degrees inverted
+        doc.saveGraphicsState();
+        const m = new MatrixClass(-1, 0, 0, -1, 4, 2);
+        doc.setCurrentTransformationMatrix(m);
+        drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
+        doc.restoreGraphicsState();
+      } else if (printOrientation === 'rotate270') {
+        // Rotate 270 degrees (90 counter-clockwise)
+        doc.saveGraphicsState();
+        const m = new MatrixClass(0, -1, 1, 0, 0, 4);
+        doc.setCurrentTransformationMatrix(m);
+        drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
+        doc.restoreGraphicsState();
+      } else {
+        // Normal horizontal [4, 2]
+        drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
+      }
     });
   } else {
     // Avery 5163 / 5963 (8.5" x 11" Letter sheet with 10 labels per page)

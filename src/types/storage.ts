@@ -1,4 +1,4 @@
-import { LabelMode, SerializedConfig, InfoConfig, ExportFormat } from './label';
+import { LabelMode, SerializedConfig, InfoConfig, ExportFormat, PrintOrientation } from './label';
 
 export interface SavedProfile {
   id: string;
@@ -10,4 +10,5 @@ export interface SavedProfile {
   infoConfig: InfoConfig;
   customSerialList?: string;
   exportFormat: ExportFormat;
+  printOrientation?: PrintOrientation;
 }
