@@ -1,0 +1,6 @@
+{
+  "name": "4x2 PDF Label Maker",
+  "description": "Professional 4x2 inch label maker for serialized barcode labels and photo information labels with PDF export and custom typography.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
