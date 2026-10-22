@@ -109,32 +109,32 @@ export const PrintContainer: React.FC<PrintContainerProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', textAlign: 'left' }}>
                 <div>
                   {item.topTitle && (
-                    <div style={{ fontSize: `${infoConfig.titleSize}pt`, fontWeight: 'bold', color: '#475569', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: `${infoConfig.titleSize}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase', marginBottom: '2px' }}>
                       {item.topTitle}
                     </div>
                   )}
-                  <div style={{ fontSize: `${infoConfig.fieldLabelSize}pt`, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: `${Math.max(9, infoConfig.fieldLabelSize)}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase' }}>
                     Image Name
                   </div>
-                  <div style={{ fontSize: `${infoConfig.imageNameSize}pt`, fontWeight: 'bold', color: '#0f172a' }}>
+                  <div style={{ fontSize: `${infoConfig.imageNameSize}pt`, fontWeight: 'bold', color: '#000000', marginTop: '1px' }}>
                     {item.primaryCode}
                   </div>
                 </div>
-                <div style={{ borderTop: '1px solid #cbd5e1', margin: '4px 0' }} />
+                <div style={{ borderTop: '1px solid #000000', margin: '4px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: `${infoConfig.fieldLabelSize}pt`, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: `${Math.max(9, infoConfig.fieldLabelSize)}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase' }}>
                       Image Date
                     </div>
-                    <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold' }}>
+                    <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold', color: '#000000', marginTop: '1px' }}>
                       {item.metaFields?.find((f) => f.label.toLowerCase().includes('date'))?.value || infoConfig.imageDate}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: `${infoConfig.fieldLabelSize}pt`, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: `${Math.max(9, infoConfig.fieldLabelSize)}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase' }}>
                       User's Name
                     </div>
-                    <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold' }}>
+                    <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold', color: '#000000', marginTop: '1px' }}>
                       {item.metaFields?.find((f) => f.label.toLowerCase().includes('user'))?.value || infoConfig.userName}
                     </div>
                   </div>
@@ -190,32 +190,32 @@ export const PrintContainer: React.FC<PrintContainerProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', textAlign: 'left' }}>
                     <div>
                       {item.topTitle && (
-                        <div style={{ fontSize: `${infoConfig.titleSize}pt`, fontWeight: 'bold', color: '#475569', textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: `${infoConfig.titleSize}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase', marginBottom: '2px' }}>
                           {item.topTitle}
                         </div>
                       )}
-                      <div style={{ fontSize: `${infoConfig.fieldLabelSize}pt`, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: `${Math.max(9, infoConfig.fieldLabelSize)}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase' }}>
                         Image Name
                       </div>
-                      <div style={{ fontSize: `${infoConfig.imageNameSize}pt`, fontWeight: 'bold', color: '#0f172a' }}>
+                      <div style={{ fontSize: `${infoConfig.imageNameSize}pt`, fontWeight: 'bold', color: '#000000', marginTop: '1px' }}>
                         {item.primaryCode}
                       </div>
                     </div>
-                    <div style={{ borderTop: '1px solid #cbd5e1', margin: '4px 0' }} />
+                    <div style={{ borderTop: '1px solid #000000', margin: '4px 0' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <div>
-                        <div style={{ fontSize: `${infoConfig.fieldLabelSize}pt`, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: `${Math.max(9, infoConfig.fieldLabelSize)}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase' }}>
                           Image Date
                         </div>
-                        <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold' }}>
+                        <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold', color: '#000000', marginTop: '1px' }}>
                           {item.metaFields?.find((f) => f.label.toLowerCase().includes('date'))?.value || infoConfig.imageDate}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: `${infoConfig.fieldLabelSize}pt`, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: `${Math.max(9, infoConfig.fieldLabelSize)}pt`, fontWeight: 'bold', color: '#000000', textTransform: 'uppercase' }}>
                           User's Name
                         </div>
-                        <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold' }}>
+                        <div style={{ fontSize: `${infoConfig.fieldValueSize}pt`, fontWeight: 'bold', color: '#000000', marginTop: '1px' }}>
                           {item.metaFields?.find((f) => f.label.toLowerCase().includes('user'))?.value || infoConfig.userName}
                         </div>
                       </div>

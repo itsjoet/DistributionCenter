@@ -91,7 +91,7 @@ export default function App() {
       userName: '',
       notes: '',
       thumbnailDataUrl: null,
-      copiesCount: 5,
+      copiesCount: 1,
 
       isBatchMode: false,
       batchItems: [

@@ -40,7 +40,7 @@ const DEFAULT_TEMPLATES: SavedProfile[] = [
       userName: '',
       notes: '',
       thumbnailDataUrl: null,
-      copiesCount: 5,
+      copiesCount: 1,
       isBatchMode: false,
       batchItems: [],
       layoutStyle: 'clean_card',

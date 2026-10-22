@@ -149,41 +149,44 @@ function drawSingleLabel(
 
     // Upper Section: Organization header (optional) & Image Name
     if (label.topTitle) {
+      // Company title alone (excluding any preceding label above it)
       doc.setFont(fontName, 'bold');
       doc.setFontSize(options.titleSize || 11);
-      doc.setTextColor(71, 85, 105);
+      doc.setTextColor(0, 0, 0);
       doc.text(label.topTitle.toUpperCase(), leftMargin, originY + 0.30);
 
-      // Field Label for Image Name
+      // Label Header: "IMAGE NAME" above the value
       doc.setFont(fontName, 'bold');
-      doc.setFontSize(options.subtitleSize || 9);
-      doc.setTextColor(148, 163, 184);
+      doc.setFontSize(Math.max(9, options.subtitleSize || 10));
+      doc.setTextColor(0, 0, 0); // Solid black so label printers print it sharply
       doc.text('IMAGE NAME', leftMargin, originY + 0.52);
 
-      // Image Name primary value
+      // Image Name primary value below the label
       doc.setFont(fontName, 'bold');
       doc.setFontSize(options.primarySize || 16);
-      doc.setTextColor(15, 23, 42);
+      doc.setTextColor(0, 0, 0);
       const splitName = doc.splitTextToSize(label.primaryCode || 'Untitled_Image.jpg', textWidth);
       doc.text(splitName[0] || '', leftMargin, originY + 0.80);
       dividerY = originY + 1.08;
     } else {
-      // Standard: No company header - allocate generous vertical space to Image Name
+      // Standard: No company header
+      // Label Header: "IMAGE NAME" above the value
       doc.setFont(fontName, 'bold');
-      doc.setFontSize(options.subtitleSize || 9);
-      doc.setTextColor(148, 163, 184);
+      doc.setFontSize(Math.max(9, options.subtitleSize || 10));
+      doc.setTextColor(0, 0, 0); // Solid black
       doc.text('IMAGE NAME', leftMargin, originY + 0.38);
 
+      // Value: The actual image name below the label
       doc.setFont(fontName, 'bold');
       doc.setFontSize(options.primarySize || 18);
-      doc.setTextColor(15, 23, 42);
+      doc.setTextColor(0, 0, 0);
       const splitName = doc.splitTextToSize(label.primaryCode || 'Untitled_Image.jpg', textWidth);
       doc.text(splitName[0] || '', leftMargin, originY + 0.72);
       dividerY = originY + 1.04;
     }
 
     // Ruled divider line across the center of the 4" x 2" label
-    doc.setDrawColor(226, 232, 240);
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.012);
     doc.line(leftMargin, dividerY, rightMargin, dividerY);
 
@@ -197,26 +200,28 @@ function drawSingleLabel(
     const dateVal = label.fields?.find((f) => f.label.toLowerCase().includes('date'))?.value || '';
     const userVal = label.fields?.find((f) => f.label.toLowerCase().includes('user'))?.value || 'Unassigned';
 
-    // Column 1: Image Date
+    // Column 1: "IMAGE DATE" Label above the date value
     doc.setFont(fontName, 'bold');
-    doc.setFontSize(options.subtitleSize || 9);
-    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(Math.max(9, options.subtitleSize || 10));
+    doc.setTextColor(0, 0, 0); // Solid black
     doc.text('IMAGE DATE', col1X, fieldLabelY);
 
+    // Value: The actual date below the label
     doc.setFont(fontName, 'bold');
     doc.setFontSize(options.fieldValueSize || 13);
-    doc.setTextColor(15, 23, 42);
+    doc.setTextColor(0, 0, 0);
     doc.text(dateVal, col1X, fieldValueY);
 
-    // Column 2: User's Name
+    // Column 2: "USER'S NAME" Label above the user name value
     doc.setFont(fontName, 'bold');
-    doc.setFontSize(options.subtitleSize || 9);
-    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(Math.max(9, options.subtitleSize || 10));
+    doc.setTextColor(0, 0, 0); // Solid black
     doc.text("USER'S NAME", col2X, fieldLabelY);
 
+    // Value: The actual user name below the label
     doc.setFont(fontName, 'bold');
     doc.setFontSize(options.fieldValueSize || 13);
-    doc.setTextColor(15, 23, 42);
+    doc.setTextColor(0, 0, 0);
     const splitUser = doc.splitTextToSize(userVal, (contentWidth / 2) - 0.1);
     doc.text(splitUser[0] || '', col2X, fieldValueY);
   }
