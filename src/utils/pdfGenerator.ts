@@ -23,6 +23,7 @@ interface CommonPdfOptions {
   primarySize: number;
   subtitleSize: number;
   barcodeHeight: number;
+  fieldValueSize?: number;
   showBarcodeHumanReadable?: boolean;
 }
 
@@ -121,82 +122,103 @@ function drawSingleLabel(
       }
     }
   } else {
-    // Mode 2: Information Label
-    // Image Name, Image Date, User's Name, plus optional notes/company/thumbnail
-    const leftMargin = originX + 0.25;
-    const contentWidth = width - 0.5;
+    // Mode 2: Information Label (Balanced across full 4" x 2" area, matching preview)
+    const leftMargin = originX + 0.28;
+    const rightMargin = originX + width - 0.28;
+    const contentWidth = width - 0.56;
 
-    // Header / Company (if provided)
-    let currentY = originY + 0.32;
-    if (label.topTitle) {
-      doc.setFont(fontName, 'bold');
-      doc.setFontSize(options.titleSize);
-      doc.setTextColor(71, 85, 105);
-      doc.text(label.topTitle.toUpperCase(), leftMargin, currentY);
-      currentY += 0.22;
-    }
+    // Check if thumbnail is present
+    const hasThumb = Boolean(label.thumbnailUrl);
+    const thumbSize = 0.90;
+    const textWidth = hasThumb ? contentWidth - thumbSize - 0.20 : contentWidth;
 
-    // Image Name (Primary Title)
-    doc.setFont(fontName, 'bold');
-    doc.setFontSize(options.primarySize);
-    doc.setTextColor(15, 23, 42);
-    
-    // Label header for Image Name
-    doc.setFontSize(options.subtitleSize);
-    doc.setFont(fontName, 'bold');
-    doc.setTextColor(100, 116, 139);
-    doc.text('IMAGE NAME', leftMargin, currentY);
-    currentY += 0.18;
-
-    doc.setFont(fontName, 'bold');
-    doc.setFontSize(options.primarySize);
-    doc.setTextColor(15, 23, 42);
-    // Truncate or wrap if long
-    const splitName = doc.splitTextToSize(label.primaryCode || 'Untitled', contentWidth - (label.thumbnailUrl ? 1.0 : 0));
-    doc.text(splitName[0] || '', leftMargin, currentY);
-    currentY += 0.28;
-
-    // Ruled divider line
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.01);
-    doc.line(leftMargin, currentY - 0.08, originX + width - 0.25, currentY - 0.08);
-
-    // Metadata Fields (Image Date, User's Name)
-    if (label.fields && label.fields.length > 0) {
-      const colWidth = (contentWidth - 0.2) / 2;
-      
-      label.fields.forEach((field, idx) => {
-        const colX = leftMargin + (idx % 2) * colWidth;
-        const rowY = currentY + Math.floor(idx / 2) * 0.38;
-
-        // Field Label (small uppercase)
-        doc.setFont(fontName, 'bold');
-        doc.setFontSize(options.subtitleSize);
-        doc.setTextColor(100, 116, 139);
-        doc.text(field.label.toUpperCase(), colX, rowY);
-
-        // Field Value
-        doc.setFont(fontName, 'bold');
-        doc.setFontSize(options.titleSize || 11);
-        doc.setTextColor(15, 23, 42);
-        doc.text(field.value, colX, rowY + 0.18);
-      });
-      currentY += 0.45;
-    }
-
-    // Optional thumbnail image preview if user provided one
-    if (label.thumbnailUrl) {
+    if (hasThumb && label.thumbnailUrl) {
       try {
-        const thumbSize = 0.75;
-        const thumbX = originX + width - thumbSize - 0.25;
-        const thumbY = originY + 0.25;
+        const thumbX = rightMargin - thumbSize;
+        const thumbY = originY + 0.22;
         doc.addImage(label.thumbnailUrl, 'JPEG', thumbX, thumbY, thumbSize, thumbSize, undefined, 'FAST');
         doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.01);
         doc.rect(thumbX, thumbY, thumbSize, thumbSize);
       } catch (e) {
         console.warn('Could not embed thumbnail into PDF', e);
       }
     }
+
+    let dividerY = originY + 1.05;
+
+    // Upper Section: Organization header (optional) & Image Name
+    if (label.topTitle) {
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(options.titleSize || 11);
+      doc.setTextColor(71, 85, 105);
+      doc.text(label.topTitle.toUpperCase(), leftMargin, originY + 0.30);
+
+      // Field Label for Image Name
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(options.subtitleSize || 9);
+      doc.setTextColor(148, 163, 184);
+      doc.text('IMAGE NAME', leftMargin, originY + 0.52);
+
+      // Image Name primary value
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(options.primarySize || 16);
+      doc.setTextColor(15, 23, 42);
+      const splitName = doc.splitTextToSize(label.primaryCode || 'Untitled_Image.jpg', textWidth);
+      doc.text(splitName[0] || '', leftMargin, originY + 0.80);
+      dividerY = originY + 1.08;
+    } else {
+      // Standard: No company header - allocate generous vertical space to Image Name
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(options.subtitleSize || 9);
+      doc.setTextColor(148, 163, 184);
+      doc.text('IMAGE NAME', leftMargin, originY + 0.38);
+
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(options.primarySize || 18);
+      doc.setTextColor(15, 23, 42);
+      const splitName = doc.splitTextToSize(label.primaryCode || 'Untitled_Image.jpg', textWidth);
+      doc.text(splitName[0] || '', leftMargin, originY + 0.72);
+      dividerY = originY + 1.04;
+    }
+
+    // Ruled divider line across the center of the 4" x 2" label
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.012);
+    doc.line(leftMargin, dividerY, rightMargin, dividerY);
+
+    // Lower Section: 2 Columns for Image Date & User's Name
+    const col1X = leftMargin;
+    const col2X = leftMargin + (contentWidth / 2) + 0.08;
+    const fieldLabelY = dividerY + 0.28;
+    const fieldValueY = fieldLabelY + 0.26;
+
+    // Find date and user values from fields
+    const dateVal = label.fields?.find((f) => f.label.toLowerCase().includes('date'))?.value || '';
+    const userVal = label.fields?.find((f) => f.label.toLowerCase().includes('user'))?.value || 'Unassigned';
+
+    // Column 1: Image Date
+    doc.setFont(fontName, 'bold');
+    doc.setFontSize(options.subtitleSize || 9);
+    doc.setTextColor(148, 163, 184);
+    doc.text('IMAGE DATE', col1X, fieldLabelY);
+
+    doc.setFont(fontName, 'bold');
+    doc.setFontSize(options.fieldValueSize || 13);
+    doc.setTextColor(15, 23, 42);
+    doc.text(dateVal, col1X, fieldValueY);
+
+    // Column 2: User's Name
+    doc.setFont(fontName, 'bold');
+    doc.setFontSize(options.subtitleSize || 9);
+    doc.setTextColor(148, 163, 184);
+    doc.text("USER'S NAME", col2X, fieldLabelY);
+
+    doc.setFont(fontName, 'bold');
+    doc.setFontSize(options.fieldValueSize || 13);
+    doc.setTextColor(15, 23, 42);
+    const splitUser = doc.splitTextToSize(userVal, (contentWidth / 2) - 0.1);
+    doc.text(splitUser[0] || '', col2X, fieldValueY);
   }
 }
 
@@ -220,17 +242,16 @@ export async function generateLabelsPdf(
   let doc: jsPDF;
 
   if (format === 'single_roll') {
-    // Single 4" x 2" page per label (standard for direct thermal roll printers)
-    // In jsPDF, [height, width] = [2, 4] with landscape orientation yields 4" wide x 2" tall
+    // Single 4" x 2" page per label (standard for direct thermal roll printers: 4" width x 2" height)
     doc = new jsPDF({
       orientation: 'landscape',
       unit: 'in',
-      format: [2, 4],
+      format: [4, 2],
     });
 
     labels.forEach((label, index) => {
       if (index > 0) {
-        doc.addPage([2, 4], 'landscape');
+        doc.addPage([4, 2], 'landscape');
       }
       drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
     });

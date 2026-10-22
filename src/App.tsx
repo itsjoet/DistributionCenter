@@ -313,6 +313,7 @@ export default function App() {
         titleSize: mode === 'serialized' ? serializedConfig.titleSize : infoConfig.titleSize,
         primarySize: mode === 'serialized' ? serializedConfig.serialSize : infoConfig.imageNameSize,
         subtitleSize: mode === 'serialized' ? serializedConfig.subtitleSize : infoConfig.fieldLabelSize,
+        fieldValueSize: infoConfig.fieldValueSize,
         barcodeHeight: serializedConfig.barcodeHeight,
         showBarcodeHumanReadable: serializedConfig.showBarcodeHumanReadable,
       };
