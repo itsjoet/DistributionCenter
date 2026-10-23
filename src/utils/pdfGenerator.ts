@@ -137,7 +137,8 @@ function drawSingleLabel(
       try {
         const thumbX = rightMargin - thumbSize;
         const thumbY = originY + 0.22;
-        doc.addImage(label.thumbnailUrl, 'JPEG', thumbX, thumbY, thumbSize, thumbSize, undefined, 'FAST');
+        const imgFormat = label.thumbnailUrl.includes('image/png') ? 'PNG' : 'JPEG';
+        doc.addImage(label.thumbnailUrl, imgFormat, thumbX, thumbY, thumbSize, thumbSize, undefined, 'FAST');
         doc.setDrawColor(203, 213, 225);
         doc.setLineWidth(0.01);
         doc.rect(thumbX, thumbY, thumbSize, thumbSize);
@@ -268,6 +269,7 @@ export async function generateLabelsPdf(
     }
 
     const MatrixClass = (doc as any).Matrix;
+    const k = doc.internal.scaleFactor; // 72 points per inch
 
     labels.forEach((label, index) => {
       if (index > 0) {
@@ -280,22 +282,23 @@ export async function generateLabelsPdf(
 
       if (printOrientation === 'rotate90') {
         // Rotate 90 degrees clockwise (maps [0, 4] x [0, 2] to [0, 2] x [0, 4])
+        // In PDF point coordinates (page width = 2*k, height = 4*k)
         doc.saveGraphicsState();
-        const m = new MatrixClass(0, 1, -1, 0, 2, 0);
+        const m = new MatrixClass(0, -1, 1, 0, -2 * k, 4 * k);
         doc.setCurrentTransformationMatrix(m);
         drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
         doc.restoreGraphicsState();
       } else if (printOrientation === 'rotate180') {
-        // Rotate 180 degrees inverted
+        // Rotate 180 degrees inverted (upside-down on 4" x 2" landscape)
         doc.saveGraphicsState();
-        const m = new MatrixClass(-1, 0, 0, -1, 4, 2);
+        const m = new MatrixClass(-1, 0, 0, -1, 4 * k, 2 * k);
         doc.setCurrentTransformationMatrix(m);
         drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
         doc.restoreGraphicsState();
       } else if (printOrientation === 'rotate270') {
-        // Rotate 270 degrees (90 counter-clockwise)
+        // Rotate 270 degrees (90 degrees counter-clockwise on 2" x 4" portrait)
         doc.saveGraphicsState();
-        const m = new MatrixClass(0, -1, 1, 0, 0, 4);
+        const m = new MatrixClass(0, 1, -1, 0, 4 * k, 0);
         doc.setCurrentTransformationMatrix(m);
         drawSingleLabel(doc, label, 0, 0, labelWidth, labelHeight, options);
         doc.restoreGraphicsState();
